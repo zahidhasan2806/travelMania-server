@@ -23,6 +23,7 @@ async function run() {
         const database = client.db("travelmania");
         const usersCollection = database.collection('users');
         const blogsCollection = database.collection('blogs');
+        const spotsCollection = database.collection('spots');
 
 
         //POST API- all users siging with email
@@ -65,6 +66,7 @@ async function run() {
             const userName = req.body.userName;
             const address = req.body.address;
             const status = req.body.status;
+            const pic = req.body.pic;
             const rating = req.body.rating;
             const userEmail = req.body.userEmail;
             const placeName = req.body.placeName;
@@ -77,7 +79,7 @@ async function run() {
             const encodedData = imageData.toString('base64')
             const imgBuffer = Buffer.from(encodedData, 'base64')
             const data = {
-                userEmail, userName, placeName, expenses, descriptions, time, date, address, status, rating,
+                userEmail, userName, placeName, expenses, descriptions, time, date, address, status, rating, pic,
                 image: imgBuffer
             }
             const result = await blogsCollection.insertOne(data);
@@ -98,14 +100,25 @@ async function run() {
             const options = { upsert: true }
             const updateDoc = {
                 $set: {
-                    status: updateStatus
+                    status: updateStatus.status
                 }
             };
             const result = await blogsCollection.updateOne(filter, updateDoc, options);
             res.json(result);
 
         });
+        //POST API- for top stops
+        app.post('/spots', async (req, res) => {
+            const spots = await spotsCollection.insertOne(req.body);
+            res.json(spots);
+        });
+        //GET API for all the top spots UI
+        app.get("/spots", async (req, res) => {
+            const result = spotsCollection.find({});
+            const spots = await result.toArray();
+            res.send(spots);
 
+        });
 
     } finally {
         //   await client.close();
