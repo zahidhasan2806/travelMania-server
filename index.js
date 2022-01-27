@@ -65,6 +65,7 @@ async function run() {
             const userName = req.body.userName;
             const address = req.body.address;
             const status = req.body.status;
+            const rating = req.body.rating;
             const userEmail = req.body.userEmail;
             const placeName = req.body.placeName;
             const expenses = req.body.expenses;
@@ -76,12 +77,34 @@ async function run() {
             const encodedData = imageData.toString('base64')
             const imgBuffer = Buffer.from(encodedData, 'base64')
             const data = {
-                userEmail, userName, placeName, expenses, descriptions, time, date, address, status,
+                userEmail, userName, placeName, expenses, descriptions, time, date, address, status, rating,
                 image: imgBuffer
             }
             const result = await blogsCollection.insertOne(data);
             res.json(result);
-        })
+        });
+        //GET API for all the products\ showing UI
+        app.get("/blogs", async (req, res) => {
+            const result = blogsCollection.find({});
+            const products = await result.toArray();
+            res.send(products);
+
+        });
+        //Update blogs status api
+        app.put('/blogs/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const updateStatus = req.body;
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: {
+                    status: updateStatus
+                }
+            };
+            const result = await blogsCollection.updateOne(filter, updateDoc, options);
+            res.json(result);
+
+        });
 
 
     } finally {
