@@ -85,13 +85,36 @@ async function run() {
             const result = await blogsCollection.insertOne(data);
             res.json(result);
         });
-        //GET API for all the products\ showing UI
+
+        //GET API for all the blogs showing UI
         app.get("/blogs", async (req, res) => {
+            console.log(req.query)
             const result = blogsCollection.find({});
-            const products = await result.toArray();
-            res.send(products);
+            //for pagination
+            const currentPage = req.query.currentPage;
+            const perPageBlog = parseInt(req.query.perPageBlog);
+            let blog;
+            const count = await result.count()
+            if (currentPage) {
+                blog = await result.skip(currentPage * perPageBlog).limit(perPageBlog).toArray()
+            } else {
+
+                blog = await result.toArray();
+            }
+            res.send({
+                count,
+                blog
+            });
 
         });
+
+        app.get("/blogs/:id", async (req, res) => {
+            const blogDetails = await blogsCollection.findOne({ _id: ObjectId(req.params.id) });
+            res.send(blogDetails);
+        })
+
+
+
         //Update blogs status api
         app.put('/blogs/:id', async (req, res) => {
             const id = req.params.id;
