@@ -130,6 +130,11 @@ async function run() {
             res.json(result);
 
         });
+        app.delete('/blogs/:id', async (req, res) => {
+            const deletedBlog = await blogsCollection.deleteOne({ _id: ObjectId(req.params.id) });
+            res.json(deletedBlog)
+        });
+
         //POST API- for top stops
         app.post('/spots', async (req, res) => {
             const spots = await spotsCollection.insertOne(req.body);
